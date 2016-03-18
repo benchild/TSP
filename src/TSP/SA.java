@@ -1,6 +1,7 @@
 package TSP;
 
 import java.util.Random;
+import TSP.Route;
 
 public class SA {
 	public double[][] x;
@@ -8,16 +9,18 @@ public class SA {
 	public int n;
 	public int T0 = 30;
 	public int k = 100;
-	public int p = 30;
+	public int p = 100;
 	public double epis = 1e-5;
 	public double alpha = 0.97;
 	public Random random;
+	public Route best_route;
 	
 	public SA(double[][] x) {
 		this.x = x;
 		n = x.length;
 	}
-	public int[] calcTSP() {
+	
+	public void evolution() {
 		random = new Random();
 		dist = new double[n][n];
 		for (int i = 0; i < n; i++)
@@ -27,7 +30,7 @@ public class SA {
 		double t = T0;
 		int cur_p = 0;
 		double length = calcLength(route);
-		while (cur_p < p && Math.abs(t) < epis) {
+		while (cur_p < p && Math.abs(t) > epis) {
 			for (int i = 0; i < k; i++) {
 				//operator 1
 				int[] new_route = getNewRouteBySwap(route);
@@ -45,8 +48,9 @@ public class SA {
 			}
 			t = t * alpha;
 		}
-		return route;
+		best_route = new Route(route, length);
 	}
+	
 	public int[] initialRoute() {
 		int[] route = new int[n];
 		boolean[] use = new boolean[n];
@@ -62,6 +66,7 @@ public class SA {
 		}
 		return route;
 	}
+	
 	public int[] getNewRouteBySwap(int[] route) {
 		int x = random.nextInt(n - 1) + 1;
 		int y = random.nextInt(n - 1) + 1;
@@ -82,6 +87,7 @@ public class SA {
 			}
 		return new_route;
 	}
+	
 	public int[] getNewRouteByInsert(int[] route) {
 		int x = random.nextInt(n - 1) + 1;
 		int y = random.nextInt(n - 1) + 1;
@@ -108,18 +114,20 @@ public class SA {
 		for (int i = 0; i < x; i++) 
 			new_route[i] = route[i];
 		for (int i = x; i <= y; i++) 
-			new_route[z - y - 1 + i] = route[i];
+			new_route[z - y + i] = route[i];
 		for (int i = y + 1; i <= z; i++) 
 			new_route[x + i - y - 1] = route[i];
 		for (int i = z + 1; i < n; i++)
 			new_route[i] = route[i];
 		return new_route;
 	}
+	
 	public double calcLength(int[] number) {
 		double length = dist[number[0]][number[n - 1]];
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < n - 1; i++) {
 			length += dist[number[i]][number[i + 1]];
 		}
 		return length;
 	}
+	
 }
